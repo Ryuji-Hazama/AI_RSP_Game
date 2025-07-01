@@ -168,7 +168,7 @@ We[("Weights")]
 
   subgraph Lim["Weight Limitation"];
     C{"Are the weights
-    inside the limits?"} -->|Too Big|R["Regurate
+    inside the limits?"} -->|Too Big|R["Regulate
     the Weights"];
     C -->|Too Small|A["Ampfize
     the Weights"];
