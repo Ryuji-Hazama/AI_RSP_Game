@@ -139,9 +139,9 @@ graph LR
 
 ```mermaid
 graph LR;
-  A{State} -->|Win| B[/"weights[0]"/] --> E["Predict"];
-  A -->|Draw| C[/"weights[1]"/] --> E;
-  A -->|Lose| D[/"weights[2]"/] --> E;
+  A{State} -->|Win| B{{"weights[0]"}} --> E["Predict"];
+  A -->|Draw| C{{"weights[1]"}} --> E;
+  A -->|Lose| D{{"weights[2]"}} --> E;
   F[/History/] --> E --> G[/Prediction/];
 ```
 
@@ -174,24 +174,25 @@ We[("Weights")]
     the Weights"];
   end
   subgraph Nor["Weight Normalization"];
-    Sv(["Soft Value"]) --> N["Normalize
+    Sv{{"Soft Value"}} --> N["Normalize
     waights"];
   end
   subgraph Pre["Prediction"];
     His[/"History"/] --> P1["Predict"];
-    Dv(["Decay Value"]) --> P1;
+    Dv{{"Decay Value"}} --> P1;
     P1 --- iP[/"Prediction"/];
+    Pw{{"Pattern Weight"}} --> P1;
   end
-  We --> P1;
   Bias --- Dv;
 
   Bias --- Sv;
   We -.-> N;
 
   N --> C
-  C -->|Yes|We;
-  R --> We;
-  A --> We;
+  C ---|Yes|Pw;
+  R --- Pw;
+  A --- Pw;
+  Pw -.-> We
 ```
 
 ### [-RSP_AIModel_wResult_2Dex V2.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_0_1.py)
@@ -209,11 +210,14 @@ We[("Weights")]
 
 ```mermaid
 graph TD;
-  H[/History/] --> Uv(["Update Value"]);
-  Uv --> U["Update Weights"];
+  subgraph A["Update Weights"];
+    Uv{{"Value for
+    Update"}} --> U["Update Weights"];
+    Ld{{"Learning Decay"}} --> Uv;
+  end
   Bias[/"Win:Draw:Lose
-    Bias"/] --- Ld(["Learning Decay"]);
-  Ld --> Uv;
+    Bias"/] --- Ld;
+  H[/History/] --> Uv;
   We[("Weights")] <-.-> U;
 ```
 
@@ -324,3 +328,42 @@ I'm wondering, what is the difference between humans' and machines' "thinking", 
 So I'm continuing to study how to simulate those human things on an AI.
 
 My priority task for now is creating deep-learning (neural network) AI.
+
+---
+
+```mermaid
+graph TD;
+
+Start(["START"]) --> Initial[["Initialize Variables"]];
+Initial --> W1[/"While True"\];
+W1 --- IniResults{{"Initialize 
+Results"}};
+IniResults --> W2[/"While
+  win < 30 and
+  lose < 30"\];
+W2 -->|True| Next{nextPredict?};
+Next -->|True|Pred[["Prediction"]];
+Next --> GetPH["Get Player's
+Hand"];
+Pred --- PrHand{{"Predicted Hand"}};
+PrHand --> GetPH;
+GetPH --> ValHand{"Valid Hand"};
+ValHand -->|False|Quit1{"Quit?"};
+Quit1 ---|False|NPFalse{{"nextPredict = False"}};
+NPFalse --> WE2[\"Loop"/];
+ValHand ---|True|NPTrue{{"nextPredict = True"}};
+NPTrue --> Judge[["Judge"]];
+Judge --> UpR["Update results"];
+UpR --> WE2;
+WE2 --> W2;
+W2 -->|False| ShowR["Show Result"];
+Quit1 --> ShowR;
+ShowR --> Continue{"Continue"};
+Continue -->|"Reset and Continue"|res[["Initialize Valiables"]];
+Continue -->|"Continue with
+current memories"|WE1[\"Loop"/];
+res --> WE1;
+WE1 --> W1;
+Continue -->|False|END(["END"]);
+
+```
