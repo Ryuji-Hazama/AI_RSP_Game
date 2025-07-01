@@ -229,7 +229,7 @@ I picked up some of those down below.
 
 #### Issue_1: *What is AI?*
 
-- **Issue: *I didn't know how to build the AI.***
+- **Issue: *I didn't know how to build an AI.***
   - I knew the basic concept of the AI structure, because I've learned it from some YouTube videos.
   - However, I didn't know how to turn that into code.
 
