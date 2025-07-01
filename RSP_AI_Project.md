@@ -1,15 +1,15 @@
-# AI_RSP_Game
+# RSP AI Project
 
-Rock Scissors Paper game using an AI model with Python.
+Rock, Scissors, Paper game using an AI model with Python.
 
-## Table of contents
+## Table of Contents
 
 > - [**Overview**](#overview)
->   1. [Project purpose](#project-purpose)
->   2. [How to run](#how-to-run)
->   3. [What could you learn (and have I learned)](#what-could-you-learn-and-have-i-learnded)
-> - [**Summaries for each version**](#summaries-for-each-version)
-> - [**About each version**](#about-each-version)
+>   1. [Project Purpose](#project-purpose)
+>   2. [How To Run](#how-to-run)
+>   3. [What Could You Learn (and Have I Learned)](#what-could-you-learn-and-have-i-learned)
+> - [**Summaries for Each Version**](#summaries-for-each-version)
+> - [**About Each Version**](#about-each-version)
 >   1. [-RSPGame](#-rspgame)
 >   2. [-RSP_AIModel(_D1)](#-rsp_aimodel_1d)
 >   3. [-RSP_AIModel_wResult_1D](#-rsp_aimodel_wresult_1d)
@@ -17,48 +17,48 @@ Rock Scissors Paper game using an AI model with Python.
 >   5. [-RSP_AIModel_wResult_2D V1.0](#-rsp_aimodel_wresult_2dex-v10)
 >   6. [-RSP_AIModel_wResult_2D V2.0](#-rsp_aimodel_wresult_2dex-v20)
 >   7. [-RSP_AIModel_wResult_2D V2.1](#-rsp_aimodel_wresult_2dex-v21)
-> - [**Project summary**](#project-summary)
->   1. [Summary overview](#summary-overview)
+> - [**Project Summary**](#project-summary)
+>   1. [Summary Overview](#summary-overview)
 >   2. [Challenges](#challenges)
->   3. [What did I learn from this project?](#what-did-i-learn-from-this-project)
->   4. [Final thoughts](#final-thoughts)
+>   3. [What Did I Learn from This Project?](#what-did-i-learn-from-this-project)
+>   4. [Final Thoughts](#final-thoughts)
 >   5. [What's next...?](#whats-next)
 
 ## Overview
 
 I created some AI models for the classic Rock, Scissors, Paper game.  
-I created those models based on the code which I found on the web (original code written in C: `https://s-shinomoto.com/janken/c.html`).
+I created those models based on the code that I found on the web (original code written in C: [`https://s-shinomoto.com/janken/c.html`](https://s-shinomoto.com/janken/c.html)).
 
-### Project purpose
+### Project Purpose
 
 The purposes are:
 
 - Experiment
 - Education
 
-For those purposes, I create the models in raw Python codes as possibe as I can to understand the structure of the AI model.
+For those purposes, I created the models in raw Python code as much as I could to understand the structure of the AI model.
 
-### How to run
+### How To Run
 
 To run the code:
 
 1. Download the Python file (with the version that you want).
-2. Navigate to the downloaded directory using terminal.
+2. Navigate to the downloaded directory using the terminal.
 3. Run command: `python3 {PythonFileName.py}` (ex. `python3 RSP_AIModel_wResult_2Dex_2_1_1.py`)
 
-Runnig code is same as the basic Python files.
+Running the code is the same as any basic Python file.
 
-### What could you learn (and have I learnded)
+### What Could You Learn (and Have I Learned)
 
 - You can learn the basic structure of AI, which is usually hidden inside the black boxes.
 - You can learn different kinds of AI models.
-  - Static AI model
+  - Static AI
   - Shallow AI
   - Adaptive AI (This time: based on shallow AI)
   - Deep learning AI (Progressing)
 - You can learn the fairness of AI (tuning AI difficulty).
 
-## Summaries for each version
+## Summaries for Each Version
 
 > ### RSPGame\*
 >
@@ -71,33 +71,64 @@ Runnig code is same as the basic Python files.
 >
 > ### \*\_wResult\_\*
 >
->> Adding weights based on the states (win/draw/lose) into the history weights.
+>> Adding weights based on the states (win/draw/lose) to the history weights.
 >
 > ### \*\_2D\*
 >
 >> Adding a layer of previous state (win/draw/lose).  
 >
 
-## About each version
+## About Each Version
 
-### -RSPGame
+### [-RSPGame](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame.py)
 
-- In this version, I created a basic random guessing AI model for controled version.
-- I created an "uncompetible" version that the player is never allowed to beat the computer.
-- In the "shorter" version, I made the code as short as possible I can for educational purpose.
+- In this version, I created a basic random guessing AI model for the controlled version.
+- I created an ["unbeatable" version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame_unCompetitable.py) that the player is never allowed to beat the computer.
+- In the ["shorter" version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame_shorter.py), I made the code as short as possible I can for educational purposes.
 
-### -RSP_AIModel(_1D)
+### [-RSP_AIModel(_1D)](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel.py)
 
-- In this version, I copied the model which I found on the web (original code was written in C: `https://s-shinomoto.com/janken/c.html`)
+- In this version, I copied the model which I found on the web (original code was written in C: [`https://s-shinomoto.com/janken/c.html`](https://s-shinomoto.com/janken/c.html))
 - I converted the code from C to Python by myself to understand the basic structure of the shallow learning AI.
-- In _1D version, I changed the weight list structure from a 1D matrix to a 2D matrix to easy to understand the structure.
+- In [_1D version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_1D.py), I changed the weight list structure from a 1D matrix to a 2D matrix to easier to understand the structure.
 
-### -RSP_AIModel_wResult_1D
+```mermaid
+graph TD;
+subgraph Y["Learning Process"];
+  B{"Was
+  prediction
+  wrong?"};
+  B -->|Yes| C["Update weights"];
+  B -->|No| D;
+  C --> D[Update History];
+end
+subgraph Z["Make Prediction"];
+  E[/"History"/] --> G["Predict"];
+  F[/Pattern weights/] --> G;
+end
+
+G --> I[/Prediction/]
+
+A[/Game Results/] --> B;
+C -.- H[(Weights)];
+H -.-> F;
+D --> E;
+```
+
+### [-RSP_AIModel_wResult_1D](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_1D.py)
 
 - From this version, I added the state(win/draw/lose) weight into the current weight matrix to get more accurate predictions.
-- This is one of the earlier models, so the weight structure is 1D matrix that iss based on RSP_AIModel.
+- This is one of the earlier models, so the weight structure is 1D matrix that is based on [RSP_AIModel](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel.py).
 
-### -RSP_AIModel_wResult_2D
+```mermaid
+graph LR
+  A[/History/] --> C["Predict"];
+  B[/"State weights +
+  Pattern weights"/] --> C;
+  C --> D[/Prediction/];
+```
+
+### [-RSP_AIModel_wResult_2D](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2D.py)
 
 - From this version, I added the previous state layer before the pattern weight layer.
 - That changed the pattern map structure from 1x3 to 3x3 (3 states(win/draw/lose) x 3 outputs (RSP)).
@@ -106,7 +137,15 @@ Runnig code is same as the basic Python files.
   - The player could throw the same hand every time he/she win.
   - The player could change the hand every time he/she lose.
 
-### -RSP_AIModel_wResult_2Dex V1.0
+```mermaid
+graph LR;
+  A{State} -->|Win| B[/"weights[0]"/] --> E["Predict"];
+  A -->|Draw| C[/"weights[1]"/] --> E;
+  A -->|Lose| D[/"weights[2]"/] --> E;
+  F[/History/] --> E --> G[/Prediction/];
+```
+
+### [-RSP_AIModel_wResult_2Dex V1.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_1_3_0.py)
 
 - From version 1.0, I added a confidence decay. Which means:
   - Calculate the decay values based on the recent win:draw:lose rate.
@@ -116,28 +155,73 @@ Runnig code is same as the basic Python files.
 - I added a weight normalization method. Which is to change the pattern map itself:
   - If the computer keeps winning, it increases the winning-pattern weights value and decreases the losing-pattern weights value.
   - If the computer keeps losing, it increases the losing-pattern weights value and decreases the winning-pattern weights value.
-  - It makes the AI more flexible and adaptible to player's strategy changes.
+  - It makes the AI more flexible and adaptable to players' strategy changes.
 - I added two weight limitations (upper limit and lower limit).
   - This limits overgrowth and overdecay (too close to zero) of the weights.
 
-### -RSP_AIModel_wResult_2Dex V2.0
+```mermaid
+graph TD;
+
+Bias[/"Win:Draw:Lose
+    Bias"/]
+We[("Weights")]
+
+  subgraph Lim["Weight Limitation"];
+    C{"Are the weights
+    inside the limits?"} -->|Too Big|R["Regurate
+    the Weights"];
+    C -->|Too Small|A["Ampfize
+    the Weights"];
+  end
+  subgraph Nor["Weight Normalization"];
+    Sv(["Soft Value"]) --> N["Normalize
+    waights"];
+  end
+  subgraph Pre["Prediction"];
+    His[/"History"/] --> P1["Predict"];
+    Dv(["Decay Value"]) --> P1;
+    P1 --- iP[/"Prediction"/];
+  end
+  We --> P1;
+  Bias --- Dv;
+
+  Bias --- Sv;
+  We -.-> N;
+
+  N --> C
+  C -->|Yes|We;
+  R --> We;
+  A --> We;
+```
+
+### [-RSP_AIModel_wResult_2Dex V2.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_0_1.py)
 
 - From version 2.0, the weight is initialized with random values.
-- This gives the model more randomness at the beggining of the game.
+- This gives the model more randomness at the beginning of the game.
 - Also, the AI becomes more human-like.
 
-### -RSP_AIModel_wResult_2Dex V2.1
+### [-RSP_AIModel_wResult_2Dex V2.1](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_1_0.py)
 
 - From version 2.1, I added the learning decay based on win/draw/lose rate.
 - This gives AI more humanity, like:
-  - If the AI keeps winning and loses once, the AI thinks, "Is this just a random noise? Let it ignore for now."
-  - And starts to keep losing, the AI thinks "Oh, this is true. I need to change strategy now."
+  - If the AI keeps winning and loses once, the AI thinks, "Is this just a random noise? Let it be ignored for now."
+  - And starts to keep losing, the AI thinks, "Oh, this is true. I need to change strategy now."
 
-## Project summary
+```mermaid
+graph TD;
+  H[/History/] --> Uv(["Update Value"]);
+  Uv --> U["Update Weights"];
+  Bias[/"Win:Draw:Lose
+    Bias"/] --- Ld(["Learning Decay"]);
+  Ld --> Uv;
+  We[("Weights")] <-.-> U;
+```
 
-### Summary overview
+## Project Summary
 
-To process this project, I've faced many problems and challenges. But at the same time, I've learned from those challenges.
+### Summary Overview
+
+To proceed with this project, I've faced many problems and challenges. But at the same time, I've learned from those challenges.
 
 I picked up some of those down below.
 
@@ -161,7 +245,7 @@ I picked up some of those down below.
 #### Issue_2: *Prediction accuracy*
 
 - **Issue: *How to make the predictions more accurate?***
-  - The AI have been just tracking the player's hand patterns in the earlier model.
+  - The AI has been just tracking the player's hand patterns in the earlier model.
   - I need to reshape the AI structure to make the predictions more accurate.
 
 - **Approach: *Add an extra layer to the model.***
@@ -189,7 +273,7 @@ I picked up some of those down below.
   - I used the state biases as a soft value.
     - Use soft values to reconsider the final results.
     - Use soft values to update (normalize) the current weight patterns.
-  - Set weight limits (upper and lower) to regurate the weight values.
+  - Set weight limits (upper and lower) to regulate the weight values.
 
 - **Result: *AI became flexible***
   - As a result, the model has become more flexible.
@@ -197,15 +281,15 @@ I picked up some of those down below.
     - Avoid overconfidence in the learning data in the early stage.
   - AI started to doubt the output and reconsider the predictions.
 
-### What did I learn from this project
+### What Did I Learn from This Project?
 
 - Basic structure of AI.
   - What is AI?
-  - How does the AI works?
-  - How does the machine learns? (In this case, player's moves.)
+  - How does the AI work?
+  - How does the machine learns? (In this case, the player's moves.)
   - How does the machine choose the answer? (In this case, how to choose a prediction.)
-  - How does the AI adapt to the different environment? (In this case, the strategy changes.)
-  - *They are usually hidden inside the **blac boxes**.*
+  - How does the AI adapt to different environments? (In this case, the strategy changes.)
+  - *They are usually hidden inside the **black boxes**.*
 - Different kinds of AI models.
   - Static AI model
   - Shallow AI
@@ -222,21 +306,21 @@ I picked up some of those down below.
     - the AI has emotions?
   - What are humanity, thinking, and emotion as an AI?
 
-### Final thoughts
+### Final Thoughts
 
 I've started this project to teach beginners the basic programming code structure. In that process, I wondered how far today's AI could understand programming code. So first, I gave the AI (ChatGPT) the standard random guessing RSP game code, and then gave unbeatable code.  
-And I've found the topic about difficulty tuning of AI in the answers from ChatGPT, and I started wondering what the "thinking" is as an AI. I wonder what if the AI starts thinking, doubting, and reconsidering its output?
+And I've found the topic about the difficulty-tuning of AI in the answers from ChatGPT, and I started wondering what the "thinking" is as an AI. I wonder what if the AI starts thinking, doubting, and reconsidering its output?
 
 So I started researching and studying AI models, created a structure from scratch (based on the code I found on the internet), and modified it to understand the AI, and also as an experiment.  
 I failed many times and faced many challenges. But every time I've gotten over it, I've learned many new things. As a result, I'm not just successfully created an adaptive AI model, but I figured out how to make it more effective.
 
-The funny thing is, I used AI (ChatGPT) to create another AI. The age of AI-generated AI might be closer than we thought. That is not a runaway sci-fi way, but human-guided, collaborated way. And we are right in the middle of it now.
+The funny thing is, I used AI (ChatGPT) to create another AI. The age of AI-generated AI might be closer than we thought. That is not a runaway sci-fi way, but a human-guided, collaborative way. And we are right in the middle of it now.
 
 Through this project, I understood that understanding AI is understanding the future.
 
 ### What's next...?
 
-I'm wondering what the difference is between "thinking", "feeling", and "emotions" in humans and machines.  
+I'm wondering, what is the difference between humans' and machines' "thinking", "feeling", and "emotions"?  
 So I'm continuing to study how to simulate those human things on an AI.
 
 My priority task for now is creating deep-learning (neural network) AI.
