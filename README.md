@@ -23,6 +23,7 @@ Rock, Scissors, Paper game using an AI model with Python.
 >   3. [What Did I Learn from This Project?](#what-did-i-learn-from-this-project)
 >   4. [Final Thoughts](#final-thoughts)
 >   5. [What's next...?](#whats-next)
+> - [**Whole System Flow Chart**](#whole-system-flow-chart)
 
 ## Overview
 
@@ -163,8 +164,10 @@ graph LR;
 graph TD;
 
 Bias[/"Win:Draw:Lose
-    Bias"/]
-We[("Weights")]
+    Bias"/];
+We[("Weights")];
+ST(["START"]);
+His[/"History"/];
 
   subgraph Lim["Weight Limitation"];
     C{"Are the weights
@@ -178,21 +181,23 @@ We[("Weights")]
     waights"];
   end
   subgraph Pre["Prediction"];
-    His[/"History"/] --> P1["Predict"];
-    Dv{{"Decay Value"}} --> P1;
+    Dv{{"Decay Value"}} --> P1["Predict"];
     P1 --- iP[/"Prediction"/];
     Pw{{"Pattern Weight"}} --> P1;
   end
-  Bias --- Dv;
 
+  His --> P1;
+  Bias --- Dv;
   Bias --- Sv;
+  ST --> Sv;
   We -.-> N;
 
-  N --> C
-  C ---|Yes|Pw;
-  R --- Pw;
-  A --- Pw;
-  Pw -.-> We
+  N --> C;
+  C -->|Yes| Pw;
+  R --> Pw;
+  A --> Pw;
+  Pw -.-> We;
+  iP --> E(["END"]);
 ```
 
 ### [-RSP_AIModel_wResult_2Dex V2.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_0_1.py)
@@ -285,6 +290,27 @@ I picked up some of those down below.
     - Avoid overconfidence in the learning data in the early stage.
   - AI started to doubt the output and reconsider the predictions.
 
+#### Issue_4: *Deep Learning*
+
+- **Issue: *What is neural network?***
+  - This is also something I knew the concept of, because I've learned it from some YouTube videos.
+  - But I didn't know the actual code.
+    - I didn't know how to put this concept into the code.
+    - I couldn't find the code that I can see the network structure.
+  - The biggest problem was, the learning process is almost completely different from the previous shallow AI.
+    - I needed to figure out the learning process.
+
+- **Approach: *Reverse Engineering***
+  - I scaled the model down to be easy to understand and conduct experiments.
+  - Before using the actual model, I made some charts and simulated it manually to understand the processes step by step.
+  - I've thought of it in reverse that starting from the output and tracing the process toward the input.
+    - From the output, which nodes activate the output?
+    - And which input activates the specific nodes connected to the output?
+    - To cause that output, what kind of state should the weights be in?
+
+- **Result: *Processing...***
+  - Processing...
+
 ### What Did I Learn from This Project?
 
 - Basic structure of AI.
@@ -329,12 +355,71 @@ So I'm continuing to study how to simulate those human things on an AI.
 
 My priority task for now is creating deep-learning (neural network) AI.
 
----
+## Whole System Flow Chart
 
 ```mermaid
 graph TD;
 
-Start(["START"]) --> Initial[["Initialize Variables"]];
+subgraph _MkPre["Make Prediction"]
+  mp_StB[\"State Bias"\] --> mp_Make["Make a Prediction"];
+  mp_His[\"Pattern History"\] --> mp_Make;
+  mp_Make --> mp_SaT["Sort and
+  Tag Predictions"];
+  mp_SaT --> mp_IniPre{{"Initial Prediction"}};
+  mp_IniPre --> mp_AdB["Add bias"];
+  mp_Wei[\"Weights"\] --> mp_AdB;
+  mp_AdB --> mp_rSaT["Resort and
+  Tag Predictions"];
+  mp_rSaT --> mp_Pred[/"Prediction"/];
+end
+
+subgraph _NormW["Weight Normalization"]
+  n_StB[\"State Bias"\] --> n_Norm["Normalize Weight Values"];
+  n_oWei[\"Weights"\] --> n_Norm;
+  n_Norm --> n_nWei[/"Normalized Weights"/];
+end
+
+subgraph _Predict["Prediction"]
+  p_Ent(["ENTRY POINT"]) --> p_FR{"Is this a
+  first round?"};
+  p_FR -->|Yes|p_Rnd["Random Prediction"];
+  p_FR -->|No|p_PreRight{"Was prediction
+  Right?"};
+  p_PlH[\"Player Hand"\] --> p_PreRight;
+  p_CmH[\"Predicted Hnad"\] --> p_PreRight;
+  p_PreRight -->|Yes| p_UpdateHistory["Update History"];
+  p_PreRight -->|No| p_UpdateWeights["Update Weights"];
+  p_UpdateWeights --> p_UpdateHistory;
+  p_UpdateHistory --> p_Norm[["Normalize the weights"]];
+  p_Norm --> p_MkPre[["Make a Prediction"]];
+  p_MkPre --> p_Ret[/"Prediction"/];
+  p_Rnd --> p_Ret;
+end
+
+p_Norm --- _NormW;
+p_MkPre --- _MkPre;
+
+p_UpdateHistory -.-> His[("History")];
+p_UpdateWeights -.- Weight[("Weights")];
+His -.- n_StB;
+His -.-|State History| mp_StB;
+His -.-|Pattern History| mp_His;
+Weight -.-> n_oWei;
+Weight -.-> mp_Wei;
+n_nWei -.-> Weight;
+
+subgraph _Judge["Judge"]
+  j_PlH[\"Player Hand"\] --> j_Judge["Judge the Hands"];
+  j_CmH[\"Computer Hand"\] --> j_Judge;
+  j_Judge --> j_SRes["Show result"];
+  j_SRes --> j_Ret[/"Result"/];
+end
+
+subgraph _IniVars["Initialize Variables"]
+  Vars[\"Variables"\] --> IniVars["Initialize"];
+end
+
+Start(["START"]) --> Initial[["Initialize Variables"]] --- _IniVars;
 Initial --> W1[/"While True"\];
 W1 --- IniResults{{"Initialize 
 Results"}};
@@ -343,23 +428,26 @@ IniResults --> W2[/"While
   lose < 30"\];
 W2 -->|True| Next{nextPredict?};
 Next -->|True|Pred[["Prediction"]];
-Next --> GetPH["Get Player's
+Pred --- _Predict;
+Pred --> PrHand{{"Predicted Hand"}};
+Next --> PrHand;
+PrHand --> GetPH["Get Player's
 Hand"];
-Pred --- PrHand{{"Predicted Hand"}};
-PrHand --> GetPH;
-GetPH --> ValHand{"Valid Hand"};
+GetPH --- m_PlH[\"Player Input"\];
+m_PlH --> ValHand{"Valid Hand"};
+ValHand ---|True|NPTrue{{"nextPredict = True"}};
 ValHand -->|False|Quit1{"Quit?"};
 Quit1 ---|False|NPFalse{{"nextPredict = False"}};
 NPFalse --> WE2[\"Loop"/];
-ValHand ---|True|NPTrue{{"nextPredict = True"}};
 NPTrue --> Judge[["Judge"]];
-Judge --> UpR["Update results"];
+Judge --- _Judge;
+Judge --> UpR["Update Results"];
 UpR --> WE2;
 WE2 --> W2;
 W2 -->|False| ShowR["Show Result"];
-Quit1 --> ShowR;
+Quit1 -->|True| ShowR;
 ShowR --> Continue{"Continue"};
-Continue -->|"Reset and Continue"|res[["Initialize Valiables"]];
+Continue -->|"Reset and Continue"|res[["Initialize Valiables"]] --- _IniVars;
 Continue -->|"Continue with
 current memories"|WE1[\"Loop"/];
 res --> WE1;
@@ -367,3 +455,9 @@ WE1 --> W1;
 Continue -->|False|END(["END"]);
 
 ```
+
+---
+
+*What do you feel when you see the **chart** and the **code** at the same time?*
+
+Is this too **messy** for a *simple* RSP game? Or is less than 1,000 lines of code too **simple** to mimic *messy* human "thoughts"?
