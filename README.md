@@ -7,14 +7,14 @@ Rock, Scissors, Paper game using an AI model with Python.
 > - [**Overview**](#overview)
 >   1. [Project Purpose](#project-purpose)
 >   2. [How To Run](#how-to-run)
->   3. [What Could You Learn (and Have I Learned)](#what-could-you-learn-and-have-i-learned)
+>   3. [What You Can Learn](#what-you-can-learn)
 > - [**Summaries for Each Version**](#summaries-for-each-version)
 > - [**About Each Version**](#about-each-version)
 >   1. [-RSPGame](#-rspgame)
->   2. [-RSP_AIModel(_D1)](#-rsp_aimodel_1d)
+>   2. [-RSP_AIModel](#-rsp_aimodel)
 >   3. [-RSP_AIModel_wResult_1D](#-rsp_aimodel_wresult_1d)
 >   4. [-RSP_AIModel_wResult_2D](#-rsp_aimodel_wresult_2d)
->   5. [-RSP_AIModel_wResult_2D V1.0](#-rsp_aimodel_wresult_2dex-v10)
+>   5. [-RSP_AIModel_wResult_2D V1](#-rsp_aimodel_wresult_2dex-v1--)
 >   6. [-RSP_AIModel_wResult_2D V2.0](#-rsp_aimodel_wresult_2dex-v20)
 >   7. [-RSP_AIModel_wResult_2D V2.1](#-rsp_aimodel_wresult_2dex-v21)
 > - [**Project Summary**](#project-summary)
@@ -49,7 +49,7 @@ To run the code:
 
 It's essentially just running a basic Python file.
 
-### What Could You Learn
+### What You Can Learn
 
 Here's what you can learn:
 
@@ -60,6 +60,8 @@ Here's what you can learn:
   - Adaptive AI (This project uses shallow AI)
   - Deep learning AI (a work in progress)
 - How AI fairness works (and how to adjust the AI's difficulty).
+
+[[Back to Top]](#table-of-contents)
 
 ## Summaries for Each Version
 
@@ -81,6 +83,8 @@ Here's what you can learn:
 >> Introduced an extra layer of state patterns (win/draw/lose).
 >
 
+[[Back to Top]](#table-of-contents)
+
 ## About Each Version
 
 ### -RSPGame
@@ -89,9 +93,9 @@ This is the basic random guessing AI model.
 
 - [RSPGame.py](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame.py)
 - Includes an ["unbeatable" version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame_unCompetitable.py) where the player can never win.
-- There's also ["shorter" version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame_shorter.py), with the code made as concise as possible for educational purposes.
+- There's also ["condensed" version](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSPGame_shorter.py), with the code made as concise as possible for educational purposes.
 
-### -RSP_AIModel(_1D)
+### -RSP_AIModel
 
 This model was based on code I found online, which I then converted from C to Python.
 
@@ -155,11 +159,11 @@ graph LR;
   F[/History/] --> E --> G[/Prediction/];
 ```
 
-### -RSP_AIModel_wResult_2Dex V1.0 -
+### -RSP_AIModel_wResult_2Dex V1 -
 
 Confidence decay, weight normalization and weight limitation were added from this version.
 
-- [RSP_AIModel_wResult_2Dex V1.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_1_3_0.py)
+- [RSP_AIModel_wResult_2Dex V1](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_1_3_0.py)
 - Confidence decay is:
   - Calculated from the recent win:draw:lose rate.
   - Using as a weight bias.
@@ -171,7 +175,6 @@ Confidence decay, weight normalization and weight limitation were added from thi
 - Weight limitation is:
   - It limits overgrowth and overdecay (too close to zero) of the weights.
 - Those changes make the AI more flexible and adaptable to players' strategy changes.
-
 
 ```mermaid
 graph TD;
@@ -186,12 +189,12 @@ His[/"History"/];
     C{"Are the weights
     inside the limits?"} -->|Too Big|R["Regulate
     the Weights"];
-    C -->|Too Small|A["Ampfize
+    C -->|Too Small|A["Amplify
     the Weights"];
   end
   subgraph Nor["Weight Normalization"];
     Sv{{"Soft Value"}} --> N["Normalize
-    waights"];
+    weights"];
   end
   subgraph Pre["Prediction"];
     Dv{{"Decay Value"}} --> P1["Predict"];
@@ -199,10 +202,10 @@ His[/"History"/];
     Pw{{"Pattern Weight"}} --> P1;
   end
 
-  His --> P1;
-  Bias --- Dv;
-  Bias --- Sv;
-  ST --> Sv;
+  His -.-> P1;
+  Bias -.-> Dv;
+  Bias -.-> Sv;
+  ST ----> Sv;
   We -.-> N;
 
   N --> C;
@@ -217,14 +220,14 @@ His[/"History"/];
 
 From this version, the weights are initializing with random values to make the model more human-like.
 
-- [RSP_AIModel_wResult_2Dex V2.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_0_1.py)
+- [RSP_AIModel_wResult_2Dex V2.0](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_0_2.py)
 - This gives the model more randomness at the beginning of the game.
 
 ### -RSP_AIModel_wResult_2Dex V2.1
 
 This version added the learning decay calculated from win/draw/lose rate.
 
-- [RSP_AIModel_wResult_2Dex V2.1](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_1_0.py)
+- [RSP_AIModel_wResult_2Dex V2.1](https://github.com/Ryuji-Hazama/AI_RSP_Game/blob/main/RSP_AIModel_wResult_2Dex_2_1_2.py)
 - If the AI keeps winning and loses once, the AI thinks, "Is this just a random noise? Let it be ignored for now."
 - And starts to keep losing, the AI thinks, "Oh, this is true. I need to change strategy now."
 
@@ -236,10 +239,12 @@ graph TD;
     Ld{{"Learning Decay"}} --> Uv;
   end
   Bias[/"Win:Draw:Lose
-    Bias"/] --- Ld;
-  H[/History/] --> Uv;
+    Bias"/] -.-> Ld;
+  H[/History/] -.-> Uv;
   We[("Weights")] <-.-> U;
 ```
+
+[[Back to Top]](#table-of-contents)
 
 ## Project Summary
 
@@ -251,7 +256,14 @@ I picked up some of those down below.
 
 ### Challenges
 
-V2.1 and before
+> V2.1 and before
+>> [**Issue_1: *What is AI?***](#issue_1-what-is-ai)  
+>> [**Issue_2: *Prediction accuracy***](#issue_2-prediction-accuracy)  
+>> [**Issue_3: *Adaption***](#issue_3-adaption)
+>
+> V3.0
+>> [**Issue_4: *Deep Learning***](#issue_4-deep-learning)
+>
 
 #### Issue_1: *What is AI?*
 
@@ -268,6 +280,8 @@ V2.1 and before
   - The code was written in raw code using only basic libraries.
   - That's why I thought that was a great example to understand the structure of the AI model.
 
+[Challenges Top](#challenges)
+
 #### Issue_2: *Prediction accuracy*
 
 - **Issue: *How to make the predictions more accurate?***
@@ -280,7 +294,7 @@ V2.1 and before
     - If the player loses, the player might change his/her hand.
     - Or perhaps, it might be completely opposite.
     - Which means human behaviour is highly related to the most recent result.
-  - So, I added a layer of result state(win/draw/lose).
+  - So, I added a layer of result state (win/draw/lose).
     - I changed pattern maps from simple 3 patterns (RSP patterns) to 3x3 patterns(3 states x 3 predictions), a total of 9 pattern maps.
 
 - **Result: *Sometimes, the AI struggles.***
@@ -288,6 +302,8 @@ V2.1 and before
   - The downside is that the learning cost has increased because of the extra pattern maps.
   - The upside is that the AI has become something like a master of the RSP game.
   - It makes the AI seem to struggle like a human.
+
+[Challenges Top](#challenges)
 
 #### Issue_3: *Adaption*
 
@@ -307,7 +323,7 @@ V2.1 and before
     - Avoid overconfidence in the learning data in the early stage.
   - AI started to doubt the output and reconsider the predictions.
 
-V3.0
+[Challenges Top](#challenges)
 
 #### Issue_4: *Deep Learning*
 
@@ -327,8 +343,10 @@ V3.0
     - And which input activates the specific nodes connected to the output?
     - To cause that output, what kind of state should the weights be in?
 
-- **Result: *Processing...***
-  - Processing...
+- **Result: *Working in progress...***
+  - Working in progress...
+
+[Challenges Top](#challenges)
 
 ### What Did I Learn from This Project?
 
@@ -349,7 +367,7 @@ V3.0
   - What if the AI becomes unbeatable?
 - The "AI philosophy" (working in progress)
   - What if...
-    - the AI doubts themselves?
+    - the AI doubts itself?
     - the AI confuses?
     - the AI struggles?
     - the AI has emotions?
@@ -371,6 +389,8 @@ Through this project, I understood that understanding AI is understanding the fu
 
 I'm currently focused on creating a deep learning AI that can simulate even more advanced froms of decision-making.  
 I'm also interested in exploring the difference between human and machine "thoughts," "feelings," and "emotions."
+
+[[Back to Top]](#table-of-contents)
 
 ## Whole System Flow Chart
 
@@ -397,10 +417,9 @@ subgraph _NormW["Weight Normalization"]
 end
 
 subgraph _Predict["Prediction"]
-  p_Ent(["ENTRY POINT"]) --> p_FR{"Is this a
-  first round?"};
-  p_FR -->|Yes|p_Rnd["Random Prediction"];
-  p_FR -->|No|p_PreRight{"Was prediction
+  p_FR{"Is this a
+  first round?"} ---->|Yes|p_Rnd["Random Prediction"];
+  p_FR ---->|No|p_PreRight{"Was prediction
   Right?"};
   p_PlH[\"Player Hand"\] --> p_PreRight;
   p_CmH[\"Predicted Hnad"\] --> p_PreRight;
@@ -413,8 +432,8 @@ subgraph _Predict["Prediction"]
   p_Rnd --> p_Ret;
 end
 
-p_Norm --- _NormW;
-p_MkPre --- _MkPre;
+p_Norm -.- _NormW;
+p_MkPre -.- _MkPre;
 
 p_UpdateHistory -.-> His[("History")];
 p_UpdateWeights -.- Weight[("Weights")];
@@ -436,45 +455,59 @@ subgraph _IniVars["Initialize Variables"]
   Vars[\"Variables"\] --> IniVars["Initialize"];
 end
 
-Start(["START"]) --> Initial[["Initialize Variables"]] --- _IniVars;
-Initial --> W1[/"While True"\];
-W1 --- IniResults{{"Initialize 
-Results"}};
-IniResults --> W2[/"While
-  win < 30 and
-  lose < 30"\];
-W2 -->|True| Next{nextPredict?};
-Next -->|True|Pred[["Prediction"]];
-Pred --- _Predict;
-Pred --> PrHand{{"Predicted Hand"}};
-Next --> PrHand;
-PrHand --> GetPH["Get Player's
-Hand"];
-GetPH --- m_PlH[\"Player Input"\];
-m_PlH --> ValHand{"Valid Hand"};
-ValHand ---|True|NPTrue{{"nextPredict = True"}};
-ValHand -->|False|Quit1{"Quit?"};
-Quit1 ---|False|NPFalse{{"nextPredict = False"}};
-NPFalse --> WE2[\"Loop"/];
-NPTrue --> Judge[["Judge"]];
-Judge --- _Judge;
-Judge --> UpR["Update Results"];
-UpR --> WE2;
-WE2 --> W2;
-W2 -->|False| ShowR["Show Result"];
-Quit1 -->|True| ShowR;
-ShowR --> Continue{"Continue"};
-Continue -->|"Reset and Continue"|res[["Initialize Valiables"]] --- _IniVars;
-Continue -->|"Continue with
-current memories"|WE1[\"Loop"/];
-res --> WE1;
-WE1 --> W1;
-Continue -->|False|END(["END"]);
+Start(["START"]) --> Initial[["Initialize Variables"]] -.- _IniVars;
+
+subgraph MainM["Main"]
+  Initial --> W1[/"While True"\];
+
+  subgraph While1["While"]
+    W1 --- IniResults{{"Initialize 
+    Results"}};
+    IniResults --> W2[/"While
+      win < 30 and
+      lose < 30"\];
+
+    subgraph While2["While"]
+      W2 -->|True| Next{nextPredict?};
+      Next -->|True|Pred[["Prediction"]];
+      Pred --> PrHand{{"Predicted Hand"}};
+      Next --> PrHand;
+      PrHand --> GetPH["Get Player's
+      Hand"];
+      GetPH --- m_PlH[\"Player Input"\];
+      m_PlH --> ValHand{"Valid Hand"};
+      ValHand ---|True|NPTrue{{"nextPredict = True"}};
+      ValHand -->|False|Quit1{"Quit?"};
+      Quit1 ---|False|NPFalse{{"nextPredict = False"}};
+      NPFalse --> WE2[\"Loop"/];
+      NPTrue --> Judge[["Judge"]];
+      Judge --> UpR["Update Results"];
+      UpR --> WE2;
+      WE2 --> W2;
+    end
+
+    W2 -->|False| ShowR["Show Result"];
+    Quit1 -->|True| ShowR;
+    ShowR --> Continue{"Continue"};
+    Continue -->|"Reset and Continue"|res[["Initialize Variables"]];
+    Continue -->|"Continue with
+    current memories"|WE1[\"Loop"/];
+    res --> WE1;
+    WE1 ----> W1;
+  end
+end
+
+res -.- _IniVars
+Judge -.- _Judge;
+Pred -.- _Predict;
+Continue ---->|False|END(["END"]);
 
 ```
 
 ---
 
-*What do you feel when you see the **chart** and the **code** at the same time?*
+*What do you feel when you look at the **chart** and the **code** side by side?*
 
-Is this too **messy** for a *simple* RSP game? Or is less than 1,000 lines of code too **simple** to mimic *messy* human "thoughts"?
+Is this too **chaotic** for a *simple* RSP game? Or is under 1,000 lines of code still too **simple** to reflect our *chaotic* human "thoughts"?
+
+[[Back to Top]](#table-of-contents)
