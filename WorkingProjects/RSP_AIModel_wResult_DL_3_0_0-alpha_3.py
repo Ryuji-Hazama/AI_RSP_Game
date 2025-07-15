@@ -16,10 +16,10 @@ class DL_RSP:
         self.OUTPUT_COUNT = outputCount
         self.LAYER_DEPTH = layers
 
-        """
-        self.weightUpperLimit = 8 ** 2 * DL_RSP.W_COUNT
-        self.weightLowerLimit = DL_RSP.W_COUNT
-        """
+        # For weight normalization
+
+        self.weightUpperLimit = 8 ** 2 * nodesCount
+        #self.weightLowerLimit = nodesCount
 
         self.learningRate = lerningRate
 
@@ -101,16 +101,6 @@ class DL_RSP:
 
     #
     #################################
-    # Regulate over weight
-
-    def regWeight(self):
-
-        for i in range(DL_RSP.W_COUNT):
-
-            self.weight[i] /= 2
-
-    #
-    #################################
     # Calculate softmax values
 
     def convNodeSoftmax(self, layerIndex):
@@ -142,7 +132,46 @@ class DL_RSP:
         for i in range(len(self.nodes[layerIndex])):
 
             self.nodes[layerIndex][i] /= x1Value
-  
+
+    #
+    ##########################
+    # Update weight
+
+    def updateWeight(weight, nomValue) -> None:
+
+        for i in range(DL_RSP.W_COUNT):
+
+            weight[i] *= nomValue
+
+    #
+    ##########################
+    # Normalize weight
+
+    def normWeight(self, layerInd) -> None:
+
+        # Get the count of weights
+
+        weightLength = len(self.weight[layerInd])
+        weightCount = len(self.weight[layerInd][0])
+
+        # Get sum of square
+
+        for i in range(weightLength):
+            sumOfSq = 0
+
+            for j in range(weightCount):
+
+                sumOfSq += self.weight[layerInd][i][j] ** 2
+
+            # If the weight is too big
+
+            if sumOfSq > self.weightUpperLimit:
+
+                print("Upper lmit")
+                for j in range(weightCount):
+
+                    self.weight[layerInd][i][j] /= 2
+        
     #
     #################################
     # Learning process
@@ -166,11 +195,7 @@ class DL_RSP:
 
         # Get cost per output node
 
-        cost = 0
-
-        for i in range(self.OUTPUT_COUNT):
-
-            cost += (self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2
+        cost = [(self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)]
 
         for predInd in range(self.OUTPUT_COUNT):
 
@@ -187,7 +212,7 @@ class DL_RSP:
 
                 # Calculate update value
 
-                updateValue = baseGrade * cost * self.learningRate
+                updateValue = baseGrade * cost[predInd] * self.learningRate
 
                 # Update weight and previous node value
 
@@ -196,7 +221,7 @@ class DL_RSP:
         # Update and normalize node values
 
         self.nodes[self.LAYER_DEPTH - 1] = self.weight[self.LAYER_DEPTH][target][:]
-        #self.normNodes(self.LAYER_DEPTH - 1)
+        self.normWeight(self.LAYER_DEPTH)
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Between hidden layer(s)
@@ -216,7 +241,7 @@ class DL_RSP:
 
                     # Get update value
 
-                    updateValue = baseGrade * cost * self.learningRate
+                    updateValue = baseGrade * cost[target] * self.learningRate
                     # Add confidence, emotion etc in the future
 
                     self.weight[nodeLayersIndex][node1Ind][node0Ind] += updateValue
@@ -240,14 +265,14 @@ class DL_RSP:
                     
             # Normalize node values
 
-            #self.normNodes(nodeLayersIndex - 1)
+            self.normWeight(nodeLayersIndex)
 
         # Update bias values
 
         for i in range(self.NODES_COUNT):
 
                 self.nodeBiases[i] += \
-                    sum(self.weight[0][i][j] * cost \
+                    sum(self.weight[0][i][j] * cost[target] \
                     for j in range(self.NODES_COUNT))
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -263,9 +288,13 @@ class DL_RSP:
 
                 # Get update value
 
-                updateValue = inputValue * activation * self.learningRate
+                updateValue = inputValue * activation * cost[target] * self.learningRate
 
                 self.weight[0][nodeIndex][inputIndex] += updateValue
+
+        # Normalize the weights
+
+        self.normWeight(0)
 
     #
     #################################
@@ -340,55 +369,6 @@ class DL_RSP:
         # Return result
 
         return self.nodes[self.LAYER_DEPTH]
-
-    #
-    ##########################
-    # Update weight
-
-    def updateWeight(weight, nomValue) -> None:
-
-        for i in range(DL_RSP.W_COUNT):
-
-            weight[i] *= nomValue
-
-    #
-    ##########################
-    # Normalize weight
-
-    def normWeight(self) -> None:
-
-        # Get bias
-
-        bias = self.getBias(DL_RSP.N * 2)
-        totalBias = sum(bias)
-
-        # Do nothing at the beginning
-
-        if sum(self.history[1]) < DL_RSP.N:
-
-            return
-        
-        # Find middle value index
-
-        midB = self.findMidIndex(bias.index(min(bias)), bias.index(max(bias)))
-
-        # Calculate normalizing weight
-
-        nom = [0.0 for _ in range(3)]
-        
-        for i in range(3):
-
-            nom[i] = 2 * bias[i] / totalBias
-
-        # Normalize
-
-        for i in range(3):
-
-            pred = self.tagPredictions(self.weight[i], self.history)
-
-            self.updateWeight(self.weight[i][pred[DL_RSP.WIN]], nom[DL_RSP.WIN])
-            self.updateWeight(self.weight[i][pred[DL_RSP.DRAW]], nom[DL_RSP.DRAW])
-            self.updateWeight(self.weight[i][pred[DL_RSP.LOSE]], nom[DL_RSP.LOSE])
 
 #
 #####################################
