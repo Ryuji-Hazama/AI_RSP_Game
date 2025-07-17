@@ -11,6 +11,14 @@ class DL_RSP:
 
     def __init__(self, inputCount, nodesCount, outputCount, layers, lerningRate):
 
+        """
+        inputCount: Input nodes count.\n
+        nodesCount: Nodes count in a layer of hidden layers.\n
+        outputCount Output nodes count.\n
+        layers: Hidden layers count.\n
+        learningRate: Learning Rate. (0.01 - 0.1 recomended)
+        """
+
         self.INPUT_COUNT = inputCount
         self.NODES_COUNT = nodesCount
         self.OUTPUT_COUNT = outputCount
@@ -18,7 +26,7 @@ class DL_RSP:
 
         # For weight normalization
 
-        self.weightUpperLimit = 8 ** 2 * nodesCount
+        self.weightUpperLimit = 5 ** 2 * nodesCount
         #self.weightLowerLimit = nodesCount
 
         self.learningRate = lerningRate
@@ -106,8 +114,8 @@ class DL_RSP:
     def convNodeSoftmax(self, layerIndex):
 
         """
-        This function convert the node values into
-        softmax values of the layer.
+        This function converts the node values into
+        softmax values of the layer (0-1 value and sum(softmax) = 1)
         """
 
         sBase = sum(math.exp(n) for n in self.nodes[layerIndex])
@@ -118,20 +126,34 @@ class DL_RSP:
 
     #
     #################################
+    # Calculate sigmoid values
+
+    def convNodeSigmoid(self, layerIndex):
+
+        """
+        This function converts the node values into
+        sigmoid value (0-1)
+        """
+
+        self.nodes[layerIndex] = \
+            [1 / (1 + math.exp(node * -1)) for node in self.nodes[layerIndex]]
+
+    #
+    #################################
     # Normalize nodes value
 
-    def normNodes(self, layerIndex):
+    def convNodeTanh(self, layerIndex):
 
         """
         This function normalize the node values
         between -1 to 1
         """
 
-        x1Value = max([abs(max(self.nodes[layerIndex])), abs(min(self.nodes[layerIndex]))])
-
-        for i in range(len(self.nodes[layerIndex])):
-
-            self.nodes[layerIndex][i] /= x1Value
+        self.nodes[layerIndex] = [(math.exp(node) - math.exp(node * -1)) \
+                                   / (math.exp(node) + math.exp(node * -1)) \
+                                      for node in self.nodes[layerIndex]]
+        
+        print(self.nodes[layerIndex])
 
     #
     ##########################
@@ -149,20 +171,16 @@ class DL_RSP:
 
     def normWeight(self, layerInd) -> None:
 
-        # Get the count of weights
+        # Find norm value
 
-        weightLength = len(self.weight[layerInd])
-        weightCount = len(self.weight[layerInd][0])
+        norm = sum(math.sqrt(sum(w ** 2 for w in weightLayer)) for weightLayer in self.weight[layerInd])
+        print(norm) # Debug
 
-        for i in range(weightLength):
+        # Normalize
 
-            # Get max value
+        if norm > self.weightUpperLimit:
 
-            maxValue = max([abs(max(self.weight[layerInd][i])), abs(min(self.weight[layerInd][i]))])
-
-            for j in range(weightCount):
-
-                self.weight[layerInd][i][j] /= maxValue
+            self.weight[layerInd] = [[w / norm for w in weightLayer] for weightLayer in self.weight[layerInd]]
         
     #
     #################################
@@ -214,6 +232,7 @@ class DL_RSP:
         # Update nodes and normalize weight values
 
         self.nodes[self.LAYER_DEPTH - 1] = self.weight[self.LAYER_DEPTH][target][:]
+        self.convNodeTanh(self.LAYER_DEPTH - 1)
         self.normWeight(self.LAYER_DEPTH)
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
@@ -257,8 +276,9 @@ class DL_RSP:
 
                     self.nodes[nodeLayersIndex - 1][node0Ind] += activation * weight
                     
-            # Normalize weight values
+            # Normalize weight and node values
 
+            self.convNodeTanh(nodeLayersIndex)
             self.normWeight(nodeLayersIndex)
 
         # Update bias values
@@ -317,7 +337,7 @@ class DL_RSP:
 
         # Get softmax for the first layer
 
-        self.convNodeSoftmax(0)
+        self.convNodeSigmoid(0)
 
         # Hidden layer
 
@@ -337,7 +357,7 @@ class DL_RSP:
 
             # Get softmax
 
-            self.convNodeSoftmax(i)
+            self.convNodeSigmoid(i)
 
         # Last output layer
 
@@ -362,7 +382,6 @@ class DL_RSP:
         ## For Debug ##
 
         print(self.nodes[self.LAYER_DEPTH])
-        print(self.nodeBiases)
 
         #for i in range(self.LAYER_DEPTH):
         #    print(self.nodes[i])
