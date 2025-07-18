@@ -9,7 +9,7 @@ class DL_RSP:
     ##########################
     # Initialize the class
 
-    def __init__(self, inputCount, nodesCount, outputCount, layers, lerningRate):
+    def __init__(self, inputCount, nodesCount, outputCount, layers, learningRate):
 
         """
         inputCount: Input nodes count.\n
@@ -29,7 +29,7 @@ class DL_RSP:
         self.weightUpperLimit = 5 ** 2 * nodesCount
         #self.weightLowerLimit = nodesCount
 
-        self.learningRate = lerningRate
+        self.learningRate = learningRate
 
         self.weight = [[[[] for _ in range(inputCount)] for _ in range(nodesCount)]] + \
                 [[[[] for _ in range(nodesCount)] for _ in range(nodesCount)] for _ in range(layers - 1)] + \
@@ -140,7 +140,7 @@ class DL_RSP:
 
     #
     #################################
-    # Normalize nodes value
+    # Calcurate Tanh value
 
     def convNodeTanh(self, layerIndex):
 
@@ -153,8 +153,6 @@ class DL_RSP:
                                    / (math.exp(node) + math.exp(node * -1)) \
                                       for node in self.nodes[layerIndex]]
         
-        print(self.nodes[layerIndex])
-
     #
     ##########################
     # Update weight
@@ -178,7 +176,7 @@ class DL_RSP:
 
         # Normalize
 
-        if norm > self.weightUpperLimit:
+        if norm > 0:
 
             self.weight[layerInd] = [[w / norm for w in weightLayer] for weightLayer in self.weight[layerInd]]
         
