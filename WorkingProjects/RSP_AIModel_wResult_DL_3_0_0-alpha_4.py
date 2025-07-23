@@ -186,11 +186,6 @@ class DL_RSP:
 
     def learnPatternMSE(self, pattern, target) -> None:
 
-        # Weight influence
-
-        Outputinfluence = [-1] * self.OUTPUT_COUNT
-        Outputinfluence[target] = 1
-
         # Get output target (the true hand)
 
         outTarget = [0] * self.OUTPUT_COUNT
@@ -201,7 +196,7 @@ class DL_RSP:
         # with MSE costs *
         # - - - - - - - -*
 
-        # Get cost per output node
+        # Get cost per output node (for MSE values)
 
         cost = [(self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)]
 
@@ -214,10 +209,9 @@ class DL_RSP:
 
                 # Get values for update calculation
 
-                negaPosiInfluence = Outputinfluence[predInd]
+                outputNode = self.nodes[self.LAYER_DEPTH][predInd]
                 activation = self.nodes[self.LAYER_DEPTH - 1][node1Ind]
-                weightInfluence = abs(self.weight[self.LAYER_DEPTH][predInd][node1Ind])
-                baseGrade = negaPosiInfluence * activation * weightInfluence
+                baseGrade = (outputNode - outTarget[predInd]) * activation
 
                 # Calculate update value
 
@@ -225,13 +219,32 @@ class DL_RSP:
 
                 # Update weight and previous node value
 
-                self.weight[self.LAYER_DEPTH][predInd][node1Ind] += updateValue
+                self.weight[self.LAYER_DEPTH][predInd][node1Ind] -= updateValue
 
-        # Update nodes and normalize weight values
+        # Normalize weight values
 
-        self.nodes[self.LAYER_DEPTH - 1] = self.weight[self.LAYER_DEPTH][target][:]
-        self.convNodeTanh(self.LAYER_DEPTH - 1)
         self.normWeight(self.LAYER_DEPTH)
+
+        # Update node values
+        
+        for nodeInd in range(self.NODES_COUNT):
+
+            self.nodes[self.LAYER_DEPTH - 1] = 0
+
+            for predInd in range(self.OUTPUT_COUNT):
+
+                # Get values for update
+
+                weight = self.weight[self.LAYER_DEPTH][predInd][nodeInd]
+                activation = self.nodes[self.LAYER_DEPTH][predInd]
+
+                # Update
+
+                self.nodes[self.LAYER_DEPTH - 1][nodeInd] += weight * activation
+
+        # Convert node values
+
+        self.convNodeTanh(self.LAYER_DEPTH - 1)
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Between hidden layer(s)
@@ -247,7 +260,6 @@ class DL_RSP:
 
                     influence = self.nodes[nodeLayersIndex][node1Ind]
                     activation = self.nodes[nodeLayersIndex - 1][node0Ind]
-                    weightInfluence = abs(self.weight[nodeLayersIndex][node1Ind][node0Ind])
                     baseGrade = influence * activation
 
                     # Get update value
@@ -256,6 +268,8 @@ class DL_RSP:
                     # Add confidence, emotion etc in the future
 
                     self.weight[nodeLayersIndex][node1Ind][node0Ind] += updateValue
+
+            self.normWeight(nodeLayersIndex)
 
             # Change nodes value
 
@@ -277,7 +291,6 @@ class DL_RSP:
             # Normalize weight and node values
 
             self.convNodeTanh(nodeLayersIndex)
-            self.normWeight(nodeLayersIndex)
 
         # Update bias values
         """
@@ -297,10 +310,11 @@ class DL_RSP:
 
                 inputValue = pattern[inputIndex]
                 activation = self.nodes[0][nodeIndex]
+                baseGrade = inputValue * activation
 
                 # Get update value
 
-                updateValue = inputValue * activation * cost[target] * self.learningRate
+                updateValue = baseGrade * cost[target] * self.learningRate
 
                 self.weight[0][nodeIndex][inputIndex] += updateValue
 
