@@ -142,16 +142,17 @@ class DL_RSP:
     #################################
     # Calcurate Tanh value
 
-    def convNodeTanh(self, layerIndex):
+    def convNodeTanh(self, nodesList) -> list:
 
         """
-        This function normalize the node values
+        This function normalize the list values
         between -1 to 1
         """
 
-        self.nodes[layerIndex] = [(math.exp(node) - math.exp(node * -1)) \
-                                   / (math.exp(node) + math.exp(node * -1)) \
-                                      for node in self.nodes[layerIndex]]
+        #print(nodesList)
+        return [((math.exp(node) - math.exp(node * -1)) \
+                                   / (math.exp(node) + math.exp(node * -1))) \
+                                      for node in nodesList]
         
     #
     ##########################
@@ -172,7 +173,6 @@ class DL_RSP:
         # Find norm value
 
         norm = sum(math.sqrt(sum(w ** 2 for w in weightLayer)) for weightLayer in self.weight[layerInd])
-        print(norm) # Debug
 
         # Normalize
 
@@ -186,10 +186,17 @@ class DL_RSP:
 
     def learnPatternMSE(self, pattern, target) -> None:
 
+        # Tempolary Nodes
+
+        tempNodes = [0 for _ in range(self.NODES_COUNT)]
+
         # Get output target (the true hand)
 
         outTarget = [0] * self.OUTPUT_COUNT
         outTarget[target] = 1
+
+        outAct = [-1] * self.OUTPUT_COUNT
+        outAct[target] = 1
 
         # - - - - - - - -*
         # Update weights *
@@ -225,26 +232,25 @@ class DL_RSP:
 
         self.normWeight(self.LAYER_DEPTH)
 
-        # Update node values
+        # Update temp node values
         
         for nodeInd in range(self.NODES_COUNT):
-
-            self.nodes[self.LAYER_DEPTH - 1] = 0
-
             for predInd in range(self.OUTPUT_COUNT):
 
                 # Get values for update
 
                 weight = self.weight[self.LAYER_DEPTH][predInd][nodeInd]
-                activation = self.nodes[self.LAYER_DEPTH][predInd]
+                loss = self.nodes[self.LAYER_DEPTH][predInd] - outTarget[predInd]
 
                 # Update
 
-                self.nodes[self.LAYER_DEPTH - 1][nodeInd] += weight * activation
+                tempNodes[nodeInd] += weight * outAct[predInd] * loss
 
         # Convert node values
 
-        self.convNodeTanh(self.LAYER_DEPTH - 1)
+        tempNodes = self.convNodeTanh(tempNodes)
+        #print(tempNodes)
+        print(f"L:{self.nodes[self.LAYER_DEPTH]}")
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Between hidden layer(s)
@@ -258,7 +264,7 @@ class DL_RSP:
 
                     # Get values for update
 
-                    influence = self.nodes[nodeLayersIndex][node1Ind]
+                    influence = self.nodes[nodeLayersIndex][node1Ind] - tempNodes[node1Ind]
                     activation = self.nodes[nodeLayersIndex - 1][node0Ind]
                     baseGrade = influence * activation
 
@@ -267,15 +273,23 @@ class DL_RSP:
                     updateValue = baseGrade * cost[target] * self.learningRate
                     # Add confidence, emotion etc in the future
 
-                    self.weight[nodeLayersIndex][node1Ind][node0Ind] += updateValue
+                    self.weight[nodeLayersIndex][node1Ind][node0Ind] -= updateValue
+
+            # Normalize the weight values
 
             self.normWeight(nodeLayersIndex)
+
+            # Calcurate activation values
+
+            for actsInd in range(self.NODES_COUNT):
+
+                self.nodes[nodeLayersIndex][actsInd] -= tempNodes[actsInd]
 
             # Change nodes value
 
             for node0Ind in range(self.NODES_COUNT):
 
-                self.nodes[nodeLayersIndex - 1][node0Ind] = 0
+                tempNodes[node0Ind] = 0
 
                 for node1Ind in range(self.NODES_COUNT):
 
@@ -286,11 +300,11 @@ class DL_RSP:
 
                     # Update
 
-                    self.nodes[nodeLayersIndex - 1][node0Ind] += activation * weight
+                    tempNodes[node0Ind] -= activation * weight
                     
             # Normalize weight and node values
 
-            self.convNodeTanh(nodeLayersIndex)
+            tempNodes = self.convNodeTanh(tempNodes)
 
         # Update bias values
         """
@@ -309,14 +323,14 @@ class DL_RSP:
                 # Get values for update
 
                 inputValue = pattern[inputIndex]
-                activation = self.nodes[0][nodeIndex]
+                activation = self.nodes[0][nodeIndex] - tempNodes[nodeIndex]
                 baseGrade = inputValue * activation
 
                 # Get update value
 
                 updateValue = baseGrade * cost[target] * self.learningRate
 
-                self.weight[0][nodeIndex][inputIndex] += updateValue
+                self.weight[0][nodeIndex][inputIndex] -= updateValue
 
         # Normalize the weights
 
