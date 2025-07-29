@@ -128,15 +128,14 @@ class DL_RSP:
     #################################
     # Calculate sigmoid values
 
-    def convNodeSigmoid(self, layerIndex):
+    def convNodeSigmoid(self, nodesList) -> list:
 
         """
         This function converts the node values into
         sigmoid value (0-1)
         """
 
-        self.nodes[layerIndex] = \
-            [1 / (1 + math.exp(node * -1)) for node in self.nodes[layerIndex]]
+        return [1 / (1 + math.exp(node * -1)) for node in nodesList]
 
     #
     #################################
@@ -188,15 +187,12 @@ class DL_RSP:
 
         # Tempolary Nodes
 
-        tempNodes = [0 for _ in range(self.NODES_COUNT)]
+        tempNodes = [[] for _ in range(2)]
 
         # Get output target (the true hand)
 
         outTarget = [0] * self.OUTPUT_COUNT
         outTarget[target] = 1
-
-        outAct = [-1] * self.OUTPUT_COUNT
-        outAct[target] = 1
 
         # - - - - - - - -*
         # Update weights *
@@ -206,6 +202,7 @@ class DL_RSP:
         # Get cost per output node (for MSE values)
 
         cost = [(self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)]
+        mseValue = sum(cost) / self.OUTPUT_COUNT
 
         for predInd in range(self.OUTPUT_COUNT):
 
@@ -227,6 +224,7 @@ class DL_RSP:
                 # Update weight and previous node value
 
                 self.weight[self.LAYER_DEPTH][predInd][node1Ind] -= updateValue
+                print(updateValue)
 
         # Normalize weight values
 
@@ -234,21 +232,11 @@ class DL_RSP:
 
         # Update temp node values
         
-        for nodeInd in range(self.NODES_COUNT):
-            for predInd in range(self.OUTPUT_COUNT):
-
-                # Get values for update
-
-                weight = self.weight[self.LAYER_DEPTH][predInd][nodeInd]
-                loss = self.nodes[self.LAYER_DEPTH][predInd] - outTarget[predInd]
-
-                # Update
-
-                tempNodes[nodeInd] += weight * outAct[predInd] * loss
+        tempNodes[0] = self.weight[self.LAYER_DEPTH][target][:]
 
         # Convert node values
 
-        tempNodes = self.convNodeTanh(tempNodes)
+        tempNodes[0] = self.convNodeSigmoid(tempNodes[0])
         #print(tempNodes)
         print(f"L:{self.nodes[self.LAYER_DEPTH]}")
 
@@ -264,13 +252,14 @@ class DL_RSP:
 
                     # Get values for update
 
-                    influence = self.nodes[nodeLayersIndex][node1Ind] - tempNodes[node1Ind]
+                    influence = self.nodes[nodeLayersIndex][node1Ind]
                     activation = self.nodes[nodeLayersIndex - 1][node0Ind]
-                    baseGrade = influence * activation
+                    baseGrade = (influence - tempNodes[0][node1Ind]) * activation
 
                     # Get update value
 
-                    updateValue = baseGrade * cost[target] * self.learningRate
+                    updateValue = baseGrade * mseValue * self.learningRate
+
                     # Add confidence, emotion etc in the future
 
                     self.weight[nodeLayersIndex][node1Ind][node0Ind] -= updateValue
@@ -279,17 +268,15 @@ class DL_RSP:
 
             self.normWeight(nodeLayersIndex)
 
-            # Calcurate activation values
+            # Move temp nodes value
 
-            for actsInd in range(self.NODES_COUNT):
-
-                self.nodes[nodeLayersIndex][actsInd] -= tempNodes[actsInd]
+            tempNodes[1] = tempNodes[0][:]
 
             # Change nodes value
 
             for node0Ind in range(self.NODES_COUNT):
 
-                tempNodes[node0Ind] = 0
+                tempNodes[0][node0Ind] = 0
 
                 for node1Ind in range(self.NODES_COUNT):
 
@@ -300,11 +287,11 @@ class DL_RSP:
 
                     # Update
 
-                    tempNodes[node0Ind] -= activation * weight
+                    tempNodes[0][node0Ind] -= activation * weight
                     
             # Normalize weight and node values
 
-            tempNodes = self.convNodeTanh(tempNodes)
+            tempNodes[0] = self.convNodeTanh(tempNodes[0])
 
         # Update bias values
         """
@@ -363,7 +350,7 @@ class DL_RSP:
 
         # Get softmax for the first layer
 
-        self.convNodeSigmoid(0)
+        self.nodes[0] = self.convNodeSigmoid(self.nodes[0])
 
         # Hidden layer
 
@@ -383,7 +370,7 @@ class DL_RSP:
 
             # Get softmax
 
-            self.convNodeSigmoid(i)
+            self.nodes[i] = self.convNodeSigmoid(self.nodes[i])
 
         # Last output layer
 
