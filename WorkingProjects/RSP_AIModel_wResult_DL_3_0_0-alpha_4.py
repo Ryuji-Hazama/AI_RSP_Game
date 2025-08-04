@@ -51,7 +51,7 @@ class DL_RSP:
             for j in range(len(self.weight[i])):
                 for k in range(len(self.weight[i][j])):
 
-                    self.weight[i][j][k] = random.uniform(-1, 1)
+                    self.weight[i][j][k] = random.uniform(-2, 2)
 
         # To avoid zeroed
 
@@ -172,6 +172,7 @@ class DL_RSP:
         # Find norm value
 
         norm = sum(math.sqrt(sum(w ** 2 for w in weightLayer)) for weightLayer in self.weight[layerInd])
+        print(norm)
 
         # Normalize
 
@@ -181,7 +182,7 @@ class DL_RSP:
         
     #
     #################################
-    # Learning process
+    # Learning process (MSE)
 
     def learnPatternMSE(self, pattern, target) -> None:
 
@@ -194,6 +195,8 @@ class DL_RSP:
         outTarget = [0] * self.OUTPUT_COUNT
         outTarget[target] = 1
 
+        print(outTarget)
+
         # - - - - - - - -*
         # Update weights *
         # with MSE costs *
@@ -203,6 +206,7 @@ class DL_RSP:
 
         cost = [(self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)]
         mseValue = sum(cost) / self.OUTPUT_COUNT
+        print(cost)
 
         for predInd in range(self.OUTPUT_COUNT):
 
@@ -224,7 +228,6 @@ class DL_RSP:
                 # Update weight and previous node value
 
                 self.weight[self.LAYER_DEPTH][predInd][node1Ind] -= updateValue
-                print(updateValue)
 
         # Normalize weight values
 
@@ -236,9 +239,10 @@ class DL_RSP:
 
         # Convert node values
 
+        #print(f"B{tempNodes[0]}")
         tempNodes[0] = self.convNodeSigmoid(tempNodes[0])
         #print(tempNodes)
-        print(f"L:{self.nodes[self.LAYER_DEPTH]}")
+        #print(f"A:{tempNodes[0]}")
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Between hidden layer(s)
@@ -282,7 +286,7 @@ class DL_RSP:
 
                     # Get values for update
 
-                    activation = self.nodes[nodeLayersIndex][node1Ind]
+                    activation = tempNodes[1][node1Ind]
                     weight = self.weight[nodeLayersIndex][node1Ind][node0Ind]
 
                     # Update
@@ -291,7 +295,7 @@ class DL_RSP:
                     
             # Normalize weight and node values
 
-            tempNodes[0] = self.convNodeTanh(tempNodes[0])
+            tempNodes[0] = self.convNodeSigmoid(tempNodes[0])
 
         # Update bias values
         """
@@ -310,7 +314,7 @@ class DL_RSP:
                 # Get values for update
 
                 inputValue = pattern[inputIndex]
-                activation = self.nodes[0][nodeIndex] - tempNodes[nodeIndex]
+                activation = self.nodes[0][nodeIndex] - tempNodes[0][nodeIndex]
                 baseGrade = inputValue * activation
 
                 # Get update value
@@ -348,7 +352,7 @@ class DL_RSP:
 
             self.nodes[0][i] = nodeValue + self.nodeBiases[i]
 
-        # Get softmax for the first layer
+        # Get sigmoid for the first layer
 
         self.nodes[0] = self.convNodeSigmoid(self.nodes[0])
 
@@ -368,7 +372,7 @@ class DL_RSP:
 
                 self.nodes[i][j] = nodeValue
 
-            # Get softmax
+            # Get sigmoid
 
             self.nodes[i] = self.convNodeSigmoid(self.nodes[i])
 
@@ -421,7 +425,7 @@ predictedHnadIndex = -1
 
 history = [[0 for _ in range(N * 3 + 3)], [[] for _ in range(N * 2 * 3)]]
 
-Prediction = DL_RSP(18, 9, 3, 2, 0.1)
+Prediction = DL_RSP(18, 9, 3, 2, 0.05)
 
 #
 #####################################
