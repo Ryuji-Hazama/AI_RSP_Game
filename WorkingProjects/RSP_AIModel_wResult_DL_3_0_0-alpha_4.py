@@ -169,17 +169,14 @@ class DL_RSP:
 
     def normWeight(self, layerInd) -> None:
 
-        # Find norm value
+        MAX_VALUE = 2.0
 
-        norm = sum(math.sqrt(sum(w ** 2 for w in weightLayer)) for weightLayer in self.weight[layerInd])
-        print(norm)
+        for i, weightLayer in enumerate(self.weight[layerInd]):
 
-        # Normalize
-
-        if norm > 0:
-
-            self.weight[layerInd] = [[w / norm for w in weightLayer] for weightLayer in self.weight[layerInd]]
+            self.weight[layerInd][i] = [max(min(w, MAX_VALUE), -MAX_VALUE) for w in weightLayer]
         
+        #print(self.weight[layerInd])
+            
     #
     #################################
     # Learning process (MSE)
