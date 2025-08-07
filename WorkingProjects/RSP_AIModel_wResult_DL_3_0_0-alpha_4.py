@@ -1,5 +1,136 @@
+from enum import IntEnum
+import datetime
+import inspect
 import math
+import os
+from os import path, mkdir, getpid
 import random
+import Tools
+import traceback
+
+class Logger:
+
+    def __init__(self, func = ""):
+
+        self.CWD = os.getcwd()
+        self.logfile = path.join(self.CWD, "logs", f"log_{datetime.datetime.now():%Y%m%d}.log")
+        self.configFile = path.join(self.CWD, "config.mpl")
+        self.intMaxValue = 4294967295
+        self.consoleLogLevel = -1
+        self.fileLogLevel = -1
+        self.func = func
+
+        #
+        ############################
+        # Check log directory
+
+        if not path.isdir(path.join(self.CWD, "logs")):
+            mkdir(path.join(self.CWD, "logs"))
+
+        #
+        ############################
+        # Set output log levels
+
+        if path.isfile(self.configFile):
+            self.consoleLogLevel = self.isLogLevel(Tools.readMapleTag(self.configFile, "CMD", "Log settings"))
+            self.fileLogLevel = self.isLogLevel(Tools.readMapleTag(self.configFile, "FLE", "Log settings"))
+
+    #
+    #####################
+    # Set log level enum
+
+    class LogLevel(IntEnum):
+
+        TRACE = 0
+        DEBUG = 1
+        INFO = 2
+        WARN = 3
+        ERROR = 4
+        FATAL = 5
+
+    #
+    ################
+    # Check log level
+
+    def isLogLevel(self, lLStr):
+
+        for lLevel in self.LogLevel:
+            if lLStr == lLevel.name:
+                return lLevel
+
+        return -1
+
+    #
+    #################################
+    # Logger
+
+    def logWriter(self, loglevel, message):
+
+        ''' - - - - - - -*
+        *                *
+        * Logging Object *
+        *                *
+        * - - - - - - -'''
+
+        f = open(self.logfile, "a")
+
+        # Get caller informations
+
+        callerFunc = inspect.stack()[1].function
+        callerLine = inspect.stack()[1].lineno
+
+        try:
+
+            # Export to console and log file
+
+            if loglevel >= self.consoleLogLevel:
+                print(f"[{loglevel.name:5}][{self.func}] {callerFunc}({callerLine}) {message}")
+        
+            if loglevel >= self.fileLogLevel:
+                print(f"({getpid()}) {datetime.datetime.now():%Y-%m-%d %H:%M:%S} [{loglevel.name:5}][{self.func}] {callerFunc}({callerLine}) {message}", file=f)
+
+        except Exception as ex:
+
+            # If faled to export, print error info to console
+
+            print(f"[ERROR] {ex}")
+
+        finally:
+            f.close()
+
+        # Check file size
+
+        try:
+
+            if path.getsize(self.logfile) > 3000000:
+
+                i = 0
+                logCopyFile = f"{self.logfile}{i}.log"
+
+                while path.isfile(logCopyFile):
+
+                    i += 1
+                    logCopyFile = f"{self.logfile}{i}.log"
+
+                os.rename(self.logfile, logCopyFile)
+
+        except Exception as ex:
+            print(f"[ERROR] {ex}")
+
+    #
+    ################################
+    # Error messages
+
+    def ShowError(self, ex):
+
+        ''' - - - - - - - - -*
+        *                    *
+        * Show and log error *
+        *                    *
+        * - - - - - - - - -'''
+
+        self.logWriter(self.LogLevel.ERROR, ex)
+        self.logWriter(self.LogLevel.ERROR, traceback.format_exc())
 
 ##############################
 # DL_RSP class
@@ -66,6 +197,8 @@ class DL_RSP:
 
             self.nodeBiases[i] = \
                 math.sqrt(rootOf) / len(self.weight[0][i]) * negative
+            
+        logger(logLevel.DEBUG, self.nodeBiases)
 
     #
     #################################
@@ -174,8 +307,6 @@ class DL_RSP:
         for i, weightLayer in enumerate(self.weight[layerInd]):
 
             self.weight[layerInd][i] = [max(min(w, MAX_VALUE), -MAX_VALUE) for w in weightLayer]
-        
-        #print(self.weight[layerInd])
             
     #
     #################################
@@ -193,6 +324,7 @@ class DL_RSP:
         outTarget[target] = 1
 
         print(outTarget)
+        logger(logLevel.DEBUG, outTarget)
 
         # - - - - - - - -*
         # Update weights *
@@ -236,10 +368,7 @@ class DL_RSP:
 
         # Convert node values
 
-        #print(f"B{tempNodes[0]}")
         tempNodes[0] = self.convNodeSigmoid(tempNodes[0])
-        #print(tempNodes)
-        #print(f"A:{tempNodes[0]}")
 
         # - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
         # Between hidden layer(s)
@@ -342,8 +471,8 @@ class DL_RSP:
 
             for j in range(self.INPUT_COUNT):
 
-                weight = self.weight[0][i][j]
                 activation = pattern[j]
+                weight = self.weight[0][i][j]
 
                 nodeValue += weight * activation
 
@@ -362,8 +491,8 @@ class DL_RSP:
 
                 for k in range(self.NODES_COUNT):
 
-                    weight = self.weight[i][j][k]
                     activation = self.nodes[i - 1][k]
+                    weight = self.weight[i][j][k]
 
                     nodeValue += weight * activation
 
@@ -397,8 +526,16 @@ class DL_RSP:
 
         print(self.nodes[self.LAYER_DEPTH])
 
-        #for i in range(self.LAYER_DEPTH):
-        #    print(self.nodes[i])
+        logger(logLevel.DEBUG, "Weights:")
+
+        for weightLayer in self.weight:
+            for nodeWeight in weightLayer:
+                logger(logLevel.DEBUG, nodeWeight)
+
+        logger(logLevel.DEBUG, "Nodes:")
+
+        for nodeLayer in self.nodes:
+            logger(logLevel.DEBUG, nodeLayer)
 
         ## ^^ Debug ^^ ##
 
@@ -422,6 +559,9 @@ predictedHnadIndex = -1
 
 history = [[0 for _ in range(N * 3 + 3)], [[] for _ in range(N * 2 * 3)]]
 
+cLogger = Logger("RSP")
+logger = cLogger.logWriter
+logLevel = cLogger.LogLevel
 Prediction = DL_RSP(18, 9, 3, 2, 0.05)
 
 #
@@ -529,6 +669,8 @@ def judgement(winHand, drawHand, judgeHand) -> int:
 #
 ###################################
 # Main method
+
+logger(logLevel.INFO, "Start game")
 
 # Greeting
 
@@ -678,6 +820,8 @@ while True:
         print("\n* AI memory cleared. *\n")
 
     else:
+
+        logger(logLevel.INFO, "Exit game")
 
         # Quit and exit
         break
