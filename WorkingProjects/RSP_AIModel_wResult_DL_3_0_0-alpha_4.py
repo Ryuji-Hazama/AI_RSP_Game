@@ -314,6 +314,8 @@ class DL_RSP:
 
     def learnPatternMSE(self, pattern, target) -> None:
 
+        logger(logLevel.INFO, "Learning start")
+
         # Tempolary Nodes
 
         tempNodes = [[] for _ in range(2)]
@@ -324,6 +326,7 @@ class DL_RSP:
         outTarget[target] = 1
 
         print(outTarget)
+        logger(logLevel.DEBUG, "Previous target:")
         logger(logLevel.DEBUG, outTarget)
 
         # - - - - - - - -*
@@ -333,9 +336,8 @@ class DL_RSP:
 
         # Get cost per output node (for MSE values)
 
-        cost = [(self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)]
-        mseValue = sum(cost) / self.OUTPUT_COUNT
-        print(cost)
+        mseValue = sum((self.nodes[self.LAYER_DEPTH][i] - outTarget[i]) ** 2 for i in range(self.OUTPUT_COUNT)) / self.OUTPUT_COUNT
+        print(mseValue)
 
         for predInd in range(self.OUTPUT_COUNT):
 
@@ -348,15 +350,15 @@ class DL_RSP:
 
                 outputNode = self.nodes[self.LAYER_DEPTH][predInd]
                 activation = self.nodes[self.LAYER_DEPTH - 1][node1Ind]
-                baseGrade = (outputNode - outTarget[predInd]) * activation
+                baseGrade = (outTarget[predInd] - outputNode) * outTarget[predInd]
 
                 # Calculate update value
 
-                updateValue = baseGrade * cost[predInd] * self.learningRate
+                updateValue = baseGrade * activation * self.learningRate
 
                 # Update weight and previous node value
 
-                self.weight[self.LAYER_DEPTH][predInd][node1Ind] -= updateValue
+                self.weight[self.LAYER_DEPTH][predInd][node1Ind] += updateValue
 
         # Normalize weight values
 
@@ -445,13 +447,15 @@ class DL_RSP:
 
                 # Get update value
 
-                updateValue = baseGrade * cost[target] * self.learningRate
+                updateValue = baseGrade * self.learningRate
 
                 self.weight[0][nodeIndex][inputIndex] -= updateValue
 
         # Normalize the weights
 
         self.normWeight(0)
+
+        logger(logLevel.INFO, "Learning complete")
 
     #
     #################################
@@ -462,6 +466,9 @@ class DL_RSP:
         # - - - - - - - - - - - *
         # Calculate node values *
         # - - - - - - - - - - - *
+
+        logger(logLevel.DEBUG, "Pattern:")
+        logger(logLevel.DEBUG, pattern)
 
         # First layer
 
@@ -528,7 +535,10 @@ class DL_RSP:
 
         logger(logLevel.DEBUG, "Weights:")
 
-        for weightLayer in self.weight:
+        for i, weightLayer in enumerate(self.weight):
+
+            logger(logLevel.DEBUG, f"[Layer - {i}]")
+
             for nodeWeight in weightLayer:
                 logger(logLevel.DEBUG, nodeWeight)
 
@@ -562,7 +572,7 @@ history = [[0 for _ in range(N * 3 + 3)], [[] for _ in range(N * 2 * 3)]]
 cLogger = Logger("RSP")
 logger = cLogger.logWriter
 logLevel = cLogger.LogLevel
-Prediction = DL_RSP(18, 9, 3, 2, 0.05)
+Prediction = DL_RSP(18, 9, 3, 2, 0.1)
 
 #
 #####################################
@@ -716,6 +726,7 @@ while True:
 
         if nextPredict:
 
+            logger(logLevel.DEBUG, f"Round {sum(resultState)}:")
             predictedHnadIndex = predict(playerHandIndex, result, history)
             comHand = HANDS[(predictedHnadIndex + 2) % 3]
 
