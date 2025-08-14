@@ -253,7 +253,7 @@ I'm also interested in exploring the difference between human and machine "thoug
 
 ### Softmax
 
-$\sigma(z)_{i} = \frac{e^{z_{i}}}{\sum_{j=1}^{K}e^{z_j}}$
+$`\sigma(z)_{i} = \frac{e^{z_{i}}}{\sum_{j=1}^{K}e^{z_j}}`$
 
 ### Propagation
 
