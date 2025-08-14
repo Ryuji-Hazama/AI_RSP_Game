@@ -248,3 +248,16 @@ I'm currently focused on creating a deep learning AI that can simulate even more
 I'm also interested in exploring the difference between human and machine "thoughts," "feelings," and "emotions."
 
 [[Back to Top]](#table-of-contents)
+
+## Equations
+
+### Softmax
+
+$\sigma(z)_{i} = \frac{e^{z_{i}}}{\sum_{j=1}^{K}e^{z_j}}$
+
+### Propagation
+
+$n_x=\sigma(a_{x-1}w_{x-1}+b_x)$  
+$output=softmax$
+
+### Backpropagation
